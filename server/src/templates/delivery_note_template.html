@@ -1,0 +1,215 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>发货单 - 天津光大钢铁有限公司</title>
+<style>
+  @page { margin: 16mm 5mm 4mm 5mm; size: A4; }
+  /* 页面与容器（沿用报价模板布局） */
+  .container { max-width: 100%; margin: 0 auto; padding: 0 10mm; background-color: #fff; box-shadow: none; border-radius: 0; box-sizing: border-box; }
+  .page-container { width: auto; background: #fff; padding: 0 8mm; box-shadow: none; border: none; min-height: auto; box-sizing: border-box; }
+  body { font-family: "Helvetica Neue", "Hiragino Sans GB", "WenQuanYi Micro Hei", "Microsoft Yahei", sans-serif; background-color: #fff !important; color: #333; margin: 0; padding: 0; font-size: 16px; }
+  img { display: block; overflow: hidden; max-width: 100%; max-height: 280px; margin: 1em auto; border-radius: 8px; }
+  h1 { font-size: 28px; margin-top: 24px; margin-bottom: 20px; }
+  h2 { font-size: 22px; }
+  h3 { font-size: 20px; }
+
+  /* 头部（完全沿用报价模板样式） */
+  .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #f0ad4e; padding-bottom: 8px; margin-bottom: 12px; }
+  .header .logo-container { flex-shrink: 0; }
+  .header .title-container { text-align: center; width: 100%; }
+  .header h1 { font-size: 28px; color: #333; margin: 0; font-weight: 600; }
+  .header h2 { font-size: 24px; color: #555; margin: 10px 0 0; font-weight: 400; letter-spacing: 2px; }
+  .header .company-title-img { max-width: 100%; height: auto; display: inline-block; margin: 0; }
+  .header .company-name-cn { font-size: 28px; line-height: 32px; color: #333; font-weight: 700; letter-spacing: 2px; margin: 0; }
+  .header .company-name-en { font-size: 14px; line-height: 18px; color: #777; letter-spacing: 2px; font-weight: 400; margin: 4px 0 0; text-transform: uppercase; }
+  .header .title-row { display: grid; grid-template-columns: 1fr auto 1fr; grid-template-rows: auto auto; column-gap: 10px; align-items: center; justify-items: center; width: 100%; }
+  .header .logo-box { grid-column: 1; grid-row: 1 / span 2; align-self: stretch; display: inline-flex; align-items: center; justify-content: center; }
+  .header .company-logo { width: 160px; height: auto; object-fit: contain; margin: 0; margin-right: -80px; }
+  .header .title-text { grid-column: 2; display: inline-block; text-align: center; }
+
+  /* 信息区（两列，与报价模板一致的排版风格） */
+  .quote-info { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 12px; }
+  .quote-info .customer-details, .quote-info .quote-meta { width: 48%; }
+  .quote-info h3 {
+    font-size: 15px;
+    color: #d9534f;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+  .quote-info p { margin: 5px 0; line-height: 1.6; }
+  .quote-info span { color: #555; display: inline-block; width: 110px; }
+  .quote-info .address-row { display: grid; grid-template-columns: 110px 1fr; align-items: start; }
+  .quote-info .address-row .value { overflow-wrap: anywhere; word-break: break-word; white-space: normal; display: block; width: 100%; }
+
+  /* 明细表格（复用报价模板表格样式） */
+  table.quote-table { width: 100%; border-collapse: collapse; margin-bottom: 0; }
+  table.quote-table th, table.quote-table td { border: 1px solid #ddd; padding: 10px 4px; text-align: left; font-size: 11px; }
+  table.quote-table th { background-color: #fff; color: #333; font-weight: 600; text-align: center; }
+  .quote-table .text-right { text-align: right; }
+  .quote-table .text-center { text-align: center; }
+  table.quote-table td { color: #555; }
+  table.quote-table tbody td { text-align: center !important; font-weight: 600; }
+
+  /* 底部备注与签章（完全沿用报价模板样式） */
+  .footer { border-top: none; margin-top: 0; padding-top: 10px; padding-bottom: 0; font-size: 12px; color: #333; }
+  .footer .footer-grid { display: grid; grid-template-columns: 3fr 2fr; column-gap: 8px; align-items: start; }
+  .footer .remarks-section h3 { font-size: 14px; font-weight: 700; color: #d9534f; margin: 10px 0 8px; }
+  .footer .remarks-section .remarks-validity { font-size: 13px; color: #555; margin: 0; }
+  .footer .remarks-section .remarks-content { font-size: 13px; color: #666; line-height: 1.8; white-space: pre-line; }
+  .footer .remarks-section .remarks-list { margin: 0; padding-left: 0; }
+  .footer .remarks-section .remarks-list li { margin: 0; line-height: 1.8; color: #666; }
+  .footer .signature-section { text-align: center; }
+  .footer .signature-section .signature-stack { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; }
+  .footer .signature-section .signature-layer { position: relative; width: 160px; height: 160px; display: flex; align-items: center; justify-content: center; margin-top: 0; }
+  .footer .signature-section .company-name { position: relative; z-index: 2; font-weight: 700; color: #cc3d3d; font-size: 14px; margin: 10px 0 4px; }
+  .footer .signature-section .stamp-image { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 160px; height: 160px; object-fit: contain; display: block; opacity: 0.95; z-index: 3; }
+  .footer .signature-section .stamp-fallback { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 160px; height: 160px; display: block; opacity: 0.95; z-index: 3; }
+  .footer .signature-section .signature-date { margin-top: 0; border-top: none; padding-top: 0; text-align: center; font-size: 12px; color: #333; }
+  @media print {
+    .page-container { zoom: 0.92; transform-origin: top center; }
+    .signature-stack, .signature-date { page-break-inside: avoid; }
+    .footer, .footer-grid, .footer .remarks-section, .footer .signature-section { page-break-inside: avoid; break-inside: avoid; }
+    table.quote-table, table.quote-table tr, table.quote-table td, table.quote-table th, table.quote-table thead, table.quote-table tbody { page-break-inside: auto; }
+  }
+</style>
+</head>
+<body>
+<div class="container"><div class="page-container">
+  <!-- 头部（与报价模板一致） -->
+  <header class="header">
+    <div class="title-container" style="text-align: center; width: 100%;">
+      <div class="title-row">
+        {{#if companyLogoUrl}}
+          <div class="logo-box">
+            <img src="{{companyLogoUrl}}" alt="公司logo" class="company-logo" />
+          </div>
+        {{/if}}
+        <div class="title-text">
+          <div class="company-name-cn">{{companyName}}</div>
+          <div class="company-name-en">TIANJIN GUANGDA STEEL CO., LTD.</div>
+        </div>
+      </div>
+      <h2 id="section-1">发 货 单</h2>
+    </div>
+  </header>
+
+  <!-- 信息区（左：客户信息；右：发货详情） -->
+  <section class="quote-info">
+    <div class="customer-details">
+      <h3>客户信息</h3>
+      <p><span>项目名称：</span>{{order_name}}</p>
+      <p><span>客户名称：</span>{{customer_name}}</p>
+      <p><span>现场接货人：</span>{{receiver_name}}</p>
+      <p><span>接货人电话：</span>{{receiver_phone}}</p>
+      <p class="address-row"><span>送货地址：</span><span class="value">{{address}}</span></p>
+    </div>
+    <div class="quote-meta">
+      <h3>发货详情</h3>
+      <p><span>发货单号：</span>{{delivery_number}}</p>
+      <p><span>发货日期：</span>{{delivery_date}}</p>
+      <p><span>发货人：</span>{{shipper_name}}</p>
+      <p><span>发货人电话：</span>{{shipper_phone}}</p>
+      <p><span>车牌号：</span>{{license_plate}}</p>
+      <p><span>送货司机及电话：</span>{{driver_name}} {{driver_phone}}</p>
+    </div>
+  </section>
+
+  <!-- 发货商品明细（表格样式与报价模板一致） -->
+  <table class="quote-table">
+    <thead>
+      <tr>
+        <th style="width:6%;">序号</th>
+        <th style="width:15%;">商品名称</th>
+        <th style="width:10%;">材质</th>
+        <th style="width:15%;">规格</th>
+        <th style="width:8%;">长度</th>
+        <th style="width:10%;">数量</th>
+        <th style="width:8%;">单位</th>
+        <th style="width:8%;">单重</th>
+        <th style="width:10%;">总重</th>
+        <th style="width:10%;">备注</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#if delivery_items_padded}}
+        {{#each delivery_items_padded}}
+        <tr>
+          <td class="text-center">{{index}}</td>
+          <td>{{product_name}}</td>
+          <td>{{material}}</td>
+          <td>{{spec}}</td>
+          <td>{{length}}</td>
+          <td class="text-right">{{quantity}}</td>
+          <td class="text-center">{{unit}}</td>
+          <td class="text-right">{{unit_weight}}</td>
+          <td class="text-right">{{total_weight}}</td>
+          <td>{{remark}}</td>
+        </tr>
+        {{/each}}
+      {{else}}
+        {{#each delivery_items}}
+        <tr>
+          <td class="text-center">{{index}}</td>
+          <td>{{product_name}}</td>
+          <td>{{material}}</td>
+          <td>{{spec}}</td>
+          <td>{{length}}</td>
+          <td class="text-right">{{quantity}}</td>
+          <td class="text-center">{{unit}}</td>
+          <td class="text-right">{{unit_weight}}</td>
+          <td class="text-right">{{total_weight}}</td>
+          <td>{{remark}}</td>
+        </tr>
+        {{/each}}
+      {{/if}}
+    </tbody>
+  </table>
+
+  <!-- 底部：左侧备注与说明；右侧公司名+签章+日期（与报价模板一致） -->
+  <div class="footer">
+    <div class="footer-grid">
+      <div class="remarks-section">
+        <h3>备注与说明:</h3>
+        {{#if remarksList}}
+        <ol class="remarks-list">
+          {{#each remarksList}}<li>{{this}}</li>{{/each}}
+        </ol>
+        {{/if}}
+        {{#if remarks}}
+          <p class="remarks-content">关于本发货单备注：{{remarks}}</p>
+        {{/if}}
+      </div>
+      <div class="signature-section">
+        <div class="signature-stack">
+          <p class="company-name">{{companyName}}</p>
+          <div class="signature-layer">
+            {{#if stampImageUrl}}
+              <img class="stamp-image" src="{{stampImageUrl}}" alt="公司签章" onload="if(this.nextElementSibling){this.nextElementSibling.style.display='none'}" onerror="this.style.display='none'; if(this.nextElementSibling){this.nextElementSibling.style.display='block'}" />
+              <svg class="stamp-fallback" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                <defs><circle id="ringPathBar" cx="100" cy="100" r="90" /></defs>
+                <circle cx="100" cy="100" r="90" fill="none" stroke="#cc3d3d" stroke-width="6" />
+                <polygon points="100,60 112,95 150,95 118,115 130,150 100,130 70,150 82,115 50,95 88,95" fill="#cc3d3d" />
+                <text font-size="14" fill="#cc3d3d" font-family="'Microsoft YaHei', 'SimSun', sans-serif">
+                  <textPath href="#ringPathBar" startOffset="6%">{{companyName}} 销售专用章</textPath>
+                </text>
+              </svg>
+            {{else}}
+              <svg class="stamp-fallback" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="display: block;">
+                <defs><circle id="ringPathBar" cx="100" cy="100" r="90" /></defs>
+                <circle cx="100" cy="100" r="90" fill="none" stroke="#cc3d3d" stroke-width="6" />
+                <polygon points="100,60 112,95 150,95 118,115 130,150 100,130 70,150 82,115 50,95 88,95" fill="#cc3d3d" />
+                <text font-size="14" fill="#cc3d3d" font-family="'Microsoft YaHei', 'SimSun', sans-serif">
+                  <textPath href="#ringPathBar" startOffset="6%">{{companyName}} 销售专用章</textPath>
+                </text>
+              </svg>
+            {{/if}}
+          </div>
+          <div class="signature-date">签章日期：{{delivery_date}}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div></div>
+</body></html>

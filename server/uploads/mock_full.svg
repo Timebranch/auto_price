@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1600" viewBox="0 0 1200 1600" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f9d976"/>
+      <stop offset="50%" stop-color="#f39c12"/>
+      <stop offset="100%" stop-color="#d35400"/>
+    </linearGradient>
+    <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+      <rect width="60" height="60" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+    </pattern>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="rgba(0,0,0,0.25)"/>
+    </filter>
+  </defs>
+  <rect x="0" y="0" width="1200" height="1600" fill="url(#bgGrad)"/>
+  <rect x="0" y="0" width="1200" height="1600" fill="url(#grid)"/>
+  <g filter="url(#shadow)">
+    <rect x="120" y="220" rx="24" ry="24" width="960" height="1160" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.6)" stroke-width="3"/>
+    <text x="600" y="480" font-family="-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, \"Noto Sans\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"WenQuanYi Micro Hei\"" font-size="56" font-weight="700" fill="#ffffff" text-anchor="middle">Mock Full-Height Image</text>
+    <text x="600" y="560" font-size="28" fill="#fff" text-anchor="middle" opacity="0.85">1200×1600 SVG · 竖版 · 占满下部区域</text>
+    <text x="600" y="620" font-size="24" fill="#fff" text-anchor="middle" opacity="0.8">用于验证第一页图片样式为 cover 的效果</text>
+  </g>
+  <g opacity="0.9">
+    <circle cx="300" cy="1100" r="180" fill="#e74c3c"/>
+    <circle cx="900" cy="1050" r="220" fill="#3498db"/>
+    <circle cx="600" cy="1250" r="140" fill="#2ecc71"/>
+  </g>
+</svg>

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>技术支持工作协作卡 - 天津光大钢铁有限公司</title>
+  <style>
+    /* === 内联自 common.css（原 ../common.css）开始 === */
+    /* Global reset */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #f57c00; /* Orange */
+      --primary-dark: #e65100;
+      --primary-light: #ffb74d;
+      --accent: #ffc107; /* Amber for warnings */
+      --bg: #f5f5f5;
+    }
+
+    body {
+      font-family: "Microsoft YaHei", Arial, sans-serif;
+      line-height: 1.6;
+      background-color: #fff; /* 去掉灰色背景，改为纯白 */
+      padding: 0; /* 去掉全局内边距，让内容顶层显示 */
+    }
+
+    .container {
+      width: 100%;
+      max-width: none; /* 去掉居中最大宽度限制 */
+      margin: 0; /* 顶层显示，不居中 */
+      background: transparent; /* 去掉白色卡片背景 */
+      padding: 0 72px; /* 左右边距提升至三倍 */
+      border-radius: 0; /* 去掉圆角 */
+      box-shadow: none; /* 去掉阴影 */
+    }
+
+    /* Header: logo + company names (white background, like the template) */
+    .site-header {
+      display: flex;
+      align-items: center;
+      justify-content: center; /* center the logo + names group */
+      gap: 16px; /* 增大间距以匹配更大的 logo 与文字 */
+      padding-bottom: 20px;
+      margin-top: 20px; /* 调整与页面顶部的距离（原40px减半） */
+      margin-bottom: 30px;
+      border-bottom: 3px solid var(--primary);
+      text-align: center; /* ensure text center when needed */
+    }
+    .site-header .logo {
+      height: 60px; /* 放大 logo */
+      width: auto;
+    }
+    .site-header .names {
+      display: flex;
+      flex-direction: column;
+      align-items: center; /* center CN/EN lines under header */
+    }
+    .site-header .names .cn {
+      font-size: 28px; /* 放大中文公司名 */
+      font-weight: bold;
+      color: #333;
+    }
+    .site-header .names .en {
+      font-size: 14px; /* 放大英文公司名 */
+      color: #777;
+      letter-spacing: 0.5px;
+    }
+
+    /* Template card */
+    .template {
+      margin-bottom: 40px;
+      padding: 0; /* 去掉卡片内边距 */
+      border: none; /* 去掉卡片边框 */
+      border-radius: 0; /* 去掉圆角 */
+      background: transparent; /* 去掉灰背景 */
+    }
+    .template h2 {
+      font-size: 22px;
+      color: var(--primary);
+      margin-bottom: 18px;
+      border-bottom: 2px solid #ddd; /* 浅灰底线，避免与上方橙色重复 */
+      padding-bottom: 8px;
+      display: flex;
+      align-items: center;
+    }
+    .template h2::before {
+      content: "📋";
+      margin-right: 10px;
+      font-size: 24px;
+    }
+
+    .template table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      background: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .template th {
+      background: #ffffff; /* 减少橙色背景 */
+      color: var(--primary); /* 保留橙色文字 */
+      padding: 12px;
+      text-align: center;
+      font-weight: bold;
+      border: 1px solid #e0e0e0; /* 与内容单元格统一颜色 */
+      vertical-align: middle; /* 表头垂直居中，确保“序号”居中效果 */
+    }
+    .template td {
+      padding: 8px;
+      text-align: left;
+      border: 1px solid #e0e0e0;
+      vertical-align: top;
+    }
+    .template td input,
+    .template td select,
+    .template td textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    .template textarea {
+      height: 80px;
+      resize: vertical;
+    }
+
+    .signature {
+      margin-top: 24px;
+      padding: 18px;
+      background: #ffffff; /* 去除橙色背景 */
+      border: 2px solid var(--primary);
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .signature div { flex: 1; text-align: center; margin: 0 10px; }
+    .signature h3 { color: var(--primary); margin-bottom: 5px; font-size: 16px; }
+    .signature p { font-style: italic; color: #666; font-size: 14px; }
+
+    .date-info {
+      margin-bottom: 16px;
+      padding: 12px 15px;
+      background: #f7f7f7; /* 去除橙色背景 */
+      border: 2px solid var(--accent); /* 保留强调色边框 */
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .date-info .date-field { flex: 1; margin: 0 10px; }
+    .date-info .date-field label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
+    .date-info .date-field input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; }
+
+    .highlight {
+      background: #f9f9f9; /* 去除橙色背景 */
+      border-left: 4px solid var(--primary); /* 保留橙色线段 */
+      padding: 15px;
+      margin: 16px 0;
+      border-radius: 0 10px 10px 0;
+    }
+    .highlight h3 { color: var(--primary); margin-bottom: 8px; font-size: 18px; }
+    .highlight ul { list-style: none; padding-left: 0; }
+    .highlight li { padding: 5px 0; color: #333; font-size: 14px; }
+    .highlight li:before { content: "• "; color: var(--primary); font-weight: bold; }
+
+    .print-only { display: none; }
+    /* Overrides: tighten header/title spacing and remove table shadow */
+    .site-header { padding-bottom: 10px; margin-bottom: 12px; }
+    .template h2 { margin-bottom: 10px; padding-bottom: 6px; }
+    .template table { box-shadow: none; }
+    /* 强制首列“序号”居中（屏幕态） */
+    .template table th:first-child,
+    .template table td:first-child { text-align: center !important; }
+    @media print {
+      .print-only { display: block; }
+      .container { padding: 0; margin: 0; width: 100%; }
+      /* 去除打印版黑色边框与表格线 */
+      .template { margin-bottom: 20px; padding: 8px; border: none; border-radius: 0; box-shadow: none; background: #fff; }
+      .template h2 { font-size: 20px; margin-bottom: 15px; }
+      /* 打印态恢复细边框线，保持可读性但不显黑粗线 */
+      .template table { border-collapse: collapse; }
+      .template th { border: 1px solid #ccc !important; }
+      .template td { border: 1px solid #ccc !important; }
+      .signature { margin-top: 20px; padding: 15px; border: none; }
+      .date-info { border: none; }
+      .template table { margin: 10px 0; }
+      .site-header { margin-top: 8px; }
+      /* 避免分页：尽量让主要块和表格不被拆分（浏览器支持有限） */
+      .template, .template table { page-break-inside: avoid; }
+      /* 覆盖打印态的标题与分隔线间距，进一步压缩整体高度 */
+      .template h2 { margin-bottom: 10px !important; padding-bottom: 5px !important; }
+      .site-header { margin-bottom: 8px !important; padding-bottom: 6px !important; }
+      /* 隐藏页面底部占位符，避免形成空白的第二页 */
+      .page-spacer { display: none !important; }
+      /* 强制首列“序号”居中（打印态） */
+      .template table th:first-child,
+      .template table td:first-child { text-align: center !important; }
+      /* 允许每日用工主表在打印时跨页显示，避免整表被推到下一页 */
+      .labor-main-table { page-break-inside: auto !important; }
+      .labor-main-table thead { page-break-inside: avoid !important; }
+    }
+
+    .page-break { page-break-before: always; }
+    /* === 内联自 common.css 结束 === */
+  </style>
+  <style>
+    /* 页面定制样式：低饱和度橙色主题点缀，强调信息清晰与可读性 */
+    .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 18px; }
+    .card h2 { font-size: 22px; color: var(--primary); margin-bottom: 12px; border-bottom: 2px solid #f0f0f0; padding-bottom: 6px; }
+    .card-info { display: block; margin-top: 6px; }
+    .card-info .fields-row { margin: 4px 0; }
+    .card-info .fields-row.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 18px; }
+    .card-info .field { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px; margin: 4px 0; }
+    .card-info .field label { display: inline; margin: 0; color: #555; font-weight: normal; font-size: 14px; }
+    .card-info .field .value { color: #555; font-weight: normal; font-size: 14px; }
+    .card-info .field .note { flex-basis: 100%; font-size: 12px; color: #999; margin-top: 2px; }
+    .card-info .field.block { flex-direction: column; align-items: flex-start; gap: 6px; }
+
+    /* 交付产物列表：轻边框与舒适行高 */
+    .deliverables { width: 100%; border-collapse: collapse; margin: 12px 0 4px; }
+    .deliverables th { padding: 8px; border: 1px solid #e0e0e0; color: var(--primary); background: #fff; text-align: center; }
+    .deliverables td { padding: 6px; border: 1px solid #e0e0e0; height: 28px; line-height: 28px; }
+    .deliverables th.seq { white-space: nowrap; }
+
+    /* 备注区：轻量突出左侧橙色强调线，不大面积用橙色 */
+    .remarks { background: #f9f9f9; border-left: 4px solid var(--primary); padding: 12px; margin-top: 12px; }
+    .remarks h3 { color: var(--primary); font-size: 16px; margin-bottom: 8px; }
+    .remarks ul { list-style: none; padding-left: 0; }
+    .remarks li { padding: 5px 0; color: #333; font-size: 14px; }
+    .remarks li::before { content: "• "; color: var(--primary); font-weight: bold; margin-right: 2px; }
+
+    /* 打印态压缩与避免拆分 */
+    @media print {
+      .container { padding: 0; margin: 0; width: 100%; }
+      .site-header { margin-bottom: 8px; padding-bottom: 6px; }
+      .card { padding: 14px; }
+      .template, .template table, .card, .remarks { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="site-header">
+      {{#if companyLogoUrl}}
+      <img class="logo" src="{{companyLogoUrl}}" alt="公司LOGO">
+      {{/if}}
+      <div class="names">
+        <div class="cn">天津光大钢铁有限公司</div>
+        <div class="en">TIANJIN GUANGDA STEEL CO., LTD.</div>
+      </div>
+    </div>
+
+    <div class="template card">
+      <h2>技术支持工作协作卡</h2>
+
+      <div class="card-info">
+        <div class="fields-row two-col">
+          <div class="field">
+            <label>项目名称：</label>
+            <span class="value">{{project_name}}</span>
+          </div>
+          <div class="field">
+            <label>客户名称：</label>
+            <span class="value">{{customer_name}}</span>
+          </div>
+        </div>
+        <div class="fields-row two-col">
+          <div class="field">
+            <label>客户端技术对接人联系方式：</label>
+            <span class="value">{{client_contact_display}}</span>
+            <span class="note">说明：仅在销售在场情况下方可联系客户端技术对接人</span>
+          </div>
+          <div class="field">
+            <label>技术任务开始时间：</label>
+            <span class="value">{{start_time}}</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>双方约定交付时间：</label>
+          <span class="value">{{deadline}}</span>
+        </div>
+        <div class="field block">
+          <label>交付产物（技术部门需在交付时提供）：</label>
+          <table class="deliverables">
+            <thead>
+              <tr><th class="seq" style="width: 6%">序号</th><th>产物说明</th></tr>
+            </thead>
+            <tbody>
+              {{#each deliverables}}
+              <tr><td style="text-align:center;">{{index}}</td><td>{{text}}</td></tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="remarks">
+        <h3>备注</h3>
+        <ul>
+          <li>此工作协作卡为销售与技术部门充分沟通后双方确认的必要执行工作。</li>
+          <li>技术部门开始此工作后，由技术负责人内部协调相关技术人员的工作内容与时间。</li>
+          <li>如技术负责人动态评估交付有风险，应尽快向公司相关责任人预警，并优先通过但不限于加班、外协等方式内部消化风险。</li>
+          <li>双方约定的交付时间到期时，技术部门必须将约定的交付产物进行交付。</li>
+          <li>如技术部门未按时按质交付约定产物，所涉及损失由技术部门承担。</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</body>
+<script>window.__readyForPrint = true;</script>
+</html>
