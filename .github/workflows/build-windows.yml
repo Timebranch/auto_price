@@ -57,7 +57,7 @@ jobs:
       - name: Package Windows (NSIS)
         env:
           USE_REMOTE_API: ${{ env.REMOTE_API_BASE != '' && 'true' || '' }}
-        run: npx electron-builder --win
+        run: npx electron-builder --win -p never
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
