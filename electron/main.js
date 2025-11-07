@@ -1,4 +1,4 @@
-const { app, BrowserWindow, dialog } = require('electron')
+const { app, BrowserWindow, dialog, protocol } = require('electron')
 const path = require('path')
 const { spawn } = require('child_process')
 
@@ -112,10 +112,20 @@ function createWindow() {
     if (apiBase) {
       process.env.VITE_API_BASE_URL = apiBase
     }
-    // 使用 loadFile 让 Electron 正确解析相对资源（./assets/…），避免 Windows 下 file:// 相对路径失效
-    win.loadFile(indexPath).catch(err => {
-      console.error('加载渲染进程失败:', err)
-    })
+    // 为 Windows 定制本地协议，避免 file:// 解析异常
+    try {
+      const distDir = path.dirname(indexPath)
+      protocol.registerFileProtocol('app', (request, callback) => {
+        const urlPath = decodeURIComponent(request.url.replace('app://', ''))
+        const filePath = path.join(distDir, urlPath)
+        callback({ path: filePath })
+      })
+      win.loadURL('app://index.html')
+    } catch (err) {
+      console.error('注册本地协议或加载页面失败:', err)
+      // 回退到 loadFile
+      win.loadFile(indexPath).catch(e => console.error('加载渲染进程失败:', e))
+    }
     win.webContents.on('did-fail-load', (_e, errorCode, errorDesc, validatedURL) => {
       console.error('渲染进程加载失败:', { errorCode, errorDesc, validatedURL })
     })
@@ -123,6 +133,12 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  // 提前注册为受信协议，保证 CSS/JS 可正常加载
+  try {
+    protocol.registerSchemesAsPrivileged([
+      { scheme: 'app', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, cspBypass: true } },
+    ])
+  } catch {}
   setupGlobalErrorHandlers()
   startServer()
   createWindow()
