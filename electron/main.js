@@ -26,6 +26,13 @@ try {
 } catch {}
 let serverProcess = null
 
+// 在 app 准备之前声明受信协议，否则相对资源解析可能异常（Windows 上尤为明显）
+try {
+  protocol.registerSchemesAsPrivileged([
+    { scheme: 'app', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, cspBypass: true, stream: true } },
+  ])
+} catch {}
+
 // 统一错误日志，避免未捕获异常导致进程直接退出
 function setupGlobalErrorHandlers() {
   const fs = require('fs')
@@ -116,9 +123,16 @@ function createWindow() {
     try {
       const distDir = path.dirname(indexPath)
       protocol.registerFileProtocol('app', (request, callback) => {
-        const urlPath = decodeURIComponent(request.url.replace('app://', ''))
-        const filePath = path.join(distDir, urlPath)
-        callback({ path: filePath })
+        try {
+          // 兼容 app://index.html、app:///index.html、app://assets/xxx 等多种形式
+          const raw = request.url.replace(/^app:\/\//, '')
+          const urlPath = decodeURIComponent(raw.replace(/^\/*/, ''))
+          const filePath = path.join(distDir, urlPath)
+          callback({ path: filePath })
+        } catch (e) {
+          console.error('协议解析失败:', request.url, e)
+          callback({ path: path.join(distDir, 'index.html') })
+        }
       })
       win.loadURL('app://index.html')
     } catch (err) {
@@ -126,19 +140,16 @@ function createWindow() {
       // 回退到 loadFile
       win.loadFile(indexPath).catch(e => console.error('加载渲染进程失败:', e))
     }
-    win.webContents.on('did-fail-load', (_e, errorCode, errorDesc, validatedURL) => {
-      console.error('渲染进程加载失败:', { errorCode, errorDesc, validatedURL })
+    win.webContents.on('did-fail-load', (_e, errorCode, errorDesc, validatedURL, isMainFrame) => {
+      console.error('渲染进程加载失败:', { errorCode, errorDesc, validatedURL, isMainFrame })
+    })
+    win.webContents.session.on('will-download', (event, item) => {
+      console.log('下载触发:', item.getFilename())
     })
   }
 }
 
 app.whenReady().then(() => {
-  // 提前注册为受信协议，保证 CSS/JS 可正常加载
-  try {
-    protocol.registerSchemesAsPrivileged([
-      { scheme: 'app', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, cspBypass: true } },
-    ])
-  } catch {}
   setupGlobalErrorHandlers()
   startServer()
   createWindow()
