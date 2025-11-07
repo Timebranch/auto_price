@@ -29,8 +29,12 @@ DOMAIN=${DOMAIN:-""}
 API_PORT=${API_PORT:-"3001"}
 USE_HTTPS=${USE_HTTPS:-"false"}
 SETUP_FIREWALL=${SETUP_FIREWALL:-"true"}
-COPY_UPLOADS=${COPY_UPLOADS:-"true"}
-COPY_DB=${COPY_DB:-"true"}
+# 默认不覆盖远端数据，保护线上数据
+COPY_UPLOADS=${COPY_UPLOADS:-"false"}
+COPY_DB=${COPY_DB:-"false"}
+# 部署前是否对远端现有数据做备份，并可选择拉回本地
+BACKUP_REMOTE=${BACKUP_REMOTE:-"true"}
+DOWNLOAD_REMOTE_BACKUP=${DOWNLOAD_REMOTE_BACKUP:-"true"}
 
 if [[ -z "$REMOTE_HOST" ]]; then
   echo "错误：必须设置 REMOTE_HOST" && exit 1
@@ -85,6 +89,19 @@ pushd "$SERVER_DIR" >/dev/null
   npm ci
   npm run build
 popd >/dev/null
+
+if [[ "$BACKUP_REMOTE" == "true" ]]; then
+  echo "==> 远端数据备份（server/data 与 server/uploads）"
+  BACKUP_TS=$(date +%Y%m%d_%H%M%S)
+  REMOTE_BACKUP_PATH="~/auto_price_backup_${BACKUP_TS}.tgz"
+  run_remote "sudo bash -lc 'mkdir -p /srv/auto_price/server && tar -czf ${REMOTE_BACKUP_PATH} -C /srv/auto_price server/data server/uploads || tar -czf ${REMOTE_BACKUP_PATH} -C /srv/auto_price server/data'" || true
+  echo "远端备份包：${REMOTE_BACKUP_PATH}"
+  if [[ "$DOWNLOAD_REMOTE_BACKUP" == "true" ]]; then
+    echo "==> 下载远端备份到本地 server/backups"
+    mkdir -p "$SERVER_DIR/server/backups" || true
+    copy_to_remote "${REMOTE_BACKUP_PATH}" "$PROJECT_ROOT/server/backups/" || echo "[警告] 远端备份拉取失败，可手动通过 scp 下载 ${REMOTE_BACKUP_PATH}"
+  fi
+fi
 
 echo "==> 打包本地产物"
 # 前端静态资源

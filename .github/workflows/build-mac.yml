@@ -1,4 +1,4 @@
-name: Build Windows Installer
+name: Build Mac Installer
 
 on:
   push:
@@ -12,8 +12,8 @@ on:
         default: ""
 
 jobs:
-  build-win:
-    runs-on: windows-latest
+  build-mac:
+    runs-on: macos-latest
     env:
       REMOTE_API_BASE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.remote_api_base || '' }}
     steps:
@@ -51,29 +51,25 @@ jobs:
           VITE_API_BASE_URL: ${{ env.REMOTE_API_BASE }}
         run: npm run build:client:electron:remote
 
-      - name: Rebuild native deps for Electron
-        run: npx electron-builder install-app-deps
-
-      - name: Rebuild server native deps for Electron (sqlite3)
-        run: npx --yes electron-rebuild -m server -f -w sqlite3
-
       - name: Write remote config for Electron app
         if: ${{ env.REMOTE_API_BASE != '' }}
-        shell: bash
         run: |
           mkdir -p config
           echo "{\"useRemoteApi\": true, \"remoteApiBase\": \"${REMOTE_API_BASE}\" }" > config/app.config.json
 
-      - name: Package Windows (NSIS)
+      - name: Rebuild native deps for Electron
+        run: npx electron-builder install-app-deps
+
+      - name: Package macOS (DMG)
         env:
           USE_REMOTE_API: ${{ env.REMOTE_API_BASE != '' && 'true' || '' }}
-        run: npx electron-builder --win -p never
+        run: npx electron-builder --mac -p never
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: windows-dist
+          name: mac-dist
           path: |
-            dist/*.exe
-            dist/*.blockmap
-            dist/win-*/**
+            dist/*.dmg
+            dist/*.zip
+            dist/mac/**

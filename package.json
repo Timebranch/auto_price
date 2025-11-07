@@ -37,6 +37,7 @@
       "client/dist/**"
     ],
     "extraResources": [
+      { "from": "config", "to": "config" },
       { "from": "server/dist", "to": "server/dist" },
       { "from": "server/package.json", "to": "server/package.json" },
       { "from": "server/node_modules", "to": "server/node_modules" },
