@@ -48,6 +48,7 @@ jobs:
         if: ${{ env.REMOTE_API_BASE != '' }}
         env:
           REMOTE_API_BASE: ${{ env.REMOTE_API_BASE }}
+          VITE_API_BASE_URL: ${{ env.REMOTE_API_BASE }}
         run: npm run build:client:electron:remote
 
       - name: Rebuild native deps for Electron
