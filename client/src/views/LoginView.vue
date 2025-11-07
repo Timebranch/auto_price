@@ -117,7 +117,8 @@ const handleLogin = async () => {
 
 // 背景图：请将图片放在 public 目录下，默认文件名为 /login-bg.jpg
 const bgStyle = computed(() => ({
-  backgroundImage: "url('/background.jpg')",
+  // 使用相对路径，确保 Electron file:// 场景下正常加载
+  backgroundImage: "url('./background.jpg')",
   backgroundSize: 'cover',
   backgroundPosition: 'center',
   backgroundRepeat: 'no-repeat'

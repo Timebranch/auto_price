@@ -38,12 +38,9 @@ function startServer() {
   const port = process.env.PORT || '3005'
   const serverEntry = path.join(process.resourcesPath, 'server', 'dist', 'index.js')
   try {
-    serverProcess = spawn(process.execPath, [serverEntry], {
-      env: { ...process.env, PORT: port },
-      stdio: 'ignore',
-      detached: true,
-    })
-    serverProcess.unref()
+    // 在打包环境下直接在主进程中加载后端入口，避免重复拉起 Electron 导致窗口循环重启
+    process.env.PORT = port
+    require(serverEntry)
   } catch (err) {
     console.error('启动内置后端失败:', err)
   }
@@ -55,6 +52,8 @@ function createWindow() {
     height: 800,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      // 允许在 file:// 场景下加载本地资源，避免白屏（如需更严格安全策略，可后续收紧）
+      webSecurity: false,
     },
   })
 
@@ -64,13 +63,35 @@ function createWindow() {
     // 可选：打开 DevTools
     // win.webContents.openDevTools()
   } else {
-    const indexPath = path.join(process.resourcesPath, 'client', 'dist', 'index.html')
+    const fs = require('fs')
+    // Electron Builder 会将应用代码打包到 app.asar 中；生产环境下应从 app 路径解析到前端构建文件
+    let indexPath = path.join(app.getAppPath(), 'client', 'dist', 'index.html')
+    if (!fs.existsSync(indexPath)) {
+      const asarIndex = path.join(process.resourcesPath || __dirname, 'app.asar', 'client', 'dist', 'index.html')
+      if (fs.existsSync(asarIndex)) {
+        indexPath = asarIndex
+      } else {
+        const unpackedIndex = path.join(process.resourcesPath || __dirname, 'app', 'client', 'dist', 'index.html')
+        if (fs.existsSync(unpackedIndex)) {
+          indexPath = unpackedIndex
+        } else {
+          console.error('找不到前端构建文件 index.html:', indexPath)
+        }
+      }
+    }
     // 若存在远端基础地址，注入给渲染进程（前端代码会读取 VITE_API_BASE_URL）
     const apiBase = remoteApiBase || process.env.VITE_API_BASE_URL || ''
     if (apiBase) {
       process.env.VITE_API_BASE_URL = apiBase
     }
-    win.loadFile(indexPath)
+    const { pathToFileURL } = require('url')
+    const fileUrl = pathToFileURL(indexPath).toString()
+    win.loadURL(fileUrl).catch(err => {
+      console.error('加载渲染进程失败:', err)
+    })
+    win.webContents.on('did-fail-load', (_e, errorCode, errorDesc, validatedURL) => {
+      console.error('渲染进程加载失败:', { errorCode, errorDesc, validatedURL })
+    })
   }
 }
 

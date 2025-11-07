@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router'
 import QuoteListView from '../views/QuoteListView.vue'
 import QuoteTemplatesView from '../views/QuoteTemplatesView.vue'
 import authService from '../api/auth'
@@ -22,8 +22,12 @@ const normalizeRole = (role?: string): Role => {
   return valid === 'user' ? 'sales' : valid
 }
 
+// 在 Electron 构建或 file:// 场景下使用 Hash 路由，避免资源相对路径在 HTML5 History 模式下丢失
+type EnvWithTarget = ImportMeta['env'] & { VITE_TARGET?: string }
+const env = import.meta.env as EnvWithTarget
+const useHash = env?.VITE_TARGET === 'electron' || (typeof window !== 'undefined' && window.location?.protocol === 'file:')
 const router = createRouter({
-  history: createWebHistory(),
+  history: useHash ? createWebHashHistory() : createWebHistory(),
   routes: [
     // 新增：首页作为默认入口
     {
