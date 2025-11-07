@@ -2,3 +2,7 @@
 server/scripts/deploy.env.local
 server/scripts/.secrets/
 node_modules
+dist/
+server/backups/
+server-dist.tgz
+server-node_modules.tgz
