@@ -54,6 +54,9 @@ jobs:
       - name: Rebuild native deps for Electron
         run: npx electron-builder install-app-deps
 
+      - name: Rebuild server native deps for Electron (sqlite3)
+        run: npx --yes electron-rebuild -m server -f -w sqlite3
+
       - name: Package Windows (NSIS)
         env:
           USE_REMOTE_API: ${{ env.REMOTE_API_BASE != '' && 'true' || '' }}

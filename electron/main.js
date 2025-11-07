@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, dialog } = require('electron')
 const path = require('path')
 const { spawn } = require('child_process')
 
@@ -26,6 +26,28 @@ try {
 } catch {}
 let serverProcess = null
 
+// 统一错误日志，避免未捕获异常导致进程直接退出
+function setupGlobalErrorHandlers() {
+  const fs = require('fs')
+  const logDir = app.getPath('userData')
+  const logFile = path.join(logDir, 'main.log')
+  function writeLog(prefix, err) {
+    const msg = `[${new Date().toISOString()}] ${prefix}: ${err && err.stack || err}\n`
+    try { fs.appendFileSync(logFile, msg) } catch {}
+    console.error(prefix, err)
+  }
+  process.on('uncaughtException', (err) => {
+    writeLog('uncaughtException', err)
+    // 在 Windows 上避免直接闪退，提示用户并尽量维持主进程运行
+    try {
+      dialog.showErrorBox('程序错误', '检测到未捕获异常，已记录日志并尝试继续运行。')
+    } catch {}
+  })
+  process.on('unhandledRejection', (reason) => {
+    writeLog('unhandledRejection', reason)
+  })
+}
+
 function startServer() {
   if (isDev) {
     // 开发模式下由根仓库脚本启动后端，避免端口冲突
@@ -38,9 +60,15 @@ function startServer() {
   const port = process.env.PORT || '3005'
   const serverEntry = path.join(process.resourcesPath, 'server', 'dist', 'index.js')
   try {
-    // 在打包环境下直接在主进程中加载后端入口，避免重复拉起 Electron 导致窗口循环重启
-    process.env.PORT = port
-    require(serverEntry)
+    // 改为独立子进程，避免原生模块在 Windows 下崩溃拖垮主进程
+    const env = { ...process.env, PORT: port }
+    serverProcess = require('child_process').fork(serverEntry, [], { env })
+    serverProcess.on('exit', (code, signal) => {
+      console.error('内置后端退出:', { code, signal })
+    })
+    serverProcess.on('error', (err) => {
+      console.error('内置后端进程错误:', err)
+    })
   } catch (err) {
     console.error('启动内置后端失败:', err)
   }
@@ -96,6 +124,7 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  setupGlobalErrorHandlers()
   startServer()
   createWindow()
   app.on('activate', () => {
