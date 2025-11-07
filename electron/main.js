@@ -112,9 +112,8 @@ function createWindow() {
     if (apiBase) {
       process.env.VITE_API_BASE_URL = apiBase
     }
-    const { pathToFileURL } = require('url')
-    const fileUrl = pathToFileURL(indexPath).toString()
-    win.loadURL(fileUrl).catch(err => {
+    // 使用 loadFile 让 Electron 正确解析相对资源（./assets/…），避免 Windows 下 file:// 相对路径失效
+    win.loadFile(indexPath).catch(err => {
       console.error('加载渲染进程失败:', err)
     })
     win.webContents.on('did-fail-load', (_e, errorCode, errorDesc, validatedURL) => {
