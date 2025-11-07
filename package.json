@@ -11,6 +11,8 @@
     "build:client:electron": "cd client && VITE_API_BASE_URL=http://localhost:3005 npm run build-only",
     "dev:electron": "cross-env VITE_DEV_SERVER_URL=http://localhost:5184 electron electron/main.js",
     "build:electron": "npm run build:server && npm run build:client:electron && electron-builder",
+    "build:electron:win": "npm run build:server && npm run build:client:electron && electron-builder --win",
+    "build:client:electron:remote": "cd client && VITE_API_BASE_URL=$REMOTE_API_BASE npm run build-only",
     "install:all": "npm install && cd client && npm install && cd ../server && npm install",
     "e2e:install": "playwright install",
     "test:e2e": "playwright test",
@@ -28,12 +30,17 @@
     "appId": "com.guangda.auto-price",
     "productName": "光大协同办公",
     "mac": { "target": "dmg" },
+    "win": { "target": "nsis", "artifactName": "光大协同办公-${version}-win-${arch}.exe" },
     "files": [
       "electron/**",
       "client/dist/**"
     ],
     "extraResources": [
-      { "from": "server/dist", "to": "server/dist" }
+      { "from": "server/dist", "to": "server/dist" },
+      { "from": "server/package.json", "to": "server/package.json" },
+      { "from": "server/node_modules", "to": "server/node_modules" },
+      { "from": "server/data", "to": "server/data" },
+      { "from": "server/uploads", "to": "server/uploads" }
     ]
   }
 }

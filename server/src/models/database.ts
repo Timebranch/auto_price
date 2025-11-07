@@ -110,6 +110,8 @@ export interface TechnicalTask {
   customer_name: string;
   sales_owner_id: number;
   technician_id?: number;
+  // 新增：支持多人归属，存储为 JSON 字符串数组（用户名）
+  technician_usernames?: string;
   client_contact_name: string;
   client_contact_phone: string;
   start_time: string; // DATETIME
@@ -377,6 +379,7 @@ export async function initDatabase(): Promise<void> {
                                             customer_name TEXT NOT NULL,
                                             sales_owner_id INTEGER NOT NULL,
                                             technician_id INTEGER,
+                                            technician_usernames TEXT,
                                             client_contact_name TEXT NOT NULL,
                                             client_contact_phone TEXT NOT NULL,
                                             start_time DATETIME NOT NULL,
@@ -393,7 +396,19 @@ export async function initDatabase(): Promise<void> {
                                           )
                                         `, (ttErr) => {
                                           if (ttErr) { reject(ttErr); return; }
-                                          insertDefaultData().then(() => resolve()).catch(reject);
+                                          // 迁移：补充缺失列（历史库可能无 technician_usernames）
+                                          db.all(`PRAGMA table_info(technical_tasks)`, (pragmaErr4, cols4: any[]) => {
+                                            if (pragmaErr4) { reject(pragmaErr4); return; }
+                                            const names4 = (cols4 || []).map((c:any) => c.name)
+                                            if (!names4.includes('technician_usernames')) {
+                                              db.run(`ALTER TABLE technical_tasks ADD COLUMN technician_usernames TEXT`, (alterErr4) => {
+                                                if (alterErr4) { reject(alterErr4); return; }
+                                                insertDefaultData().then(() => resolve()).catch(reject);
+                                              })
+                                            } else {
+                                              insertDefaultData().then(() => resolve()).catch(reject);
+                                            }
+                                          })
                                         });
                                       });
                                     });

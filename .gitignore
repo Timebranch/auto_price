@@ -1,3 +1,4 @@
 # 保护本地敏感部署配置不入库
 server/scripts/deploy.env.local
 server/scripts/.secrets/
+node_modules

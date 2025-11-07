@@ -1,0 +1,66 @@
+name: Build Windows Installer
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      remote_api_base:
+        description: "远端API基础地址（为空则用本地内置后端）"
+        required: false
+        default: ""
+
+jobs:
+  build-win:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install root dependencies
+        run: |
+          npm ci
+      - name: Install client dependencies
+        working-directory: client
+        run: |
+          npm ci
+      - name: Install server dependencies
+        working-directory: server
+        run: |
+          npm ci
+
+      - name: Build server (ts -> dist)
+        run: npm run build:server
+
+      - name: Build client for Electron (local backend)
+        if: ${{ inputs.remote_api_base == '' }}
+        run: npm run build:client:electron
+
+      - name: Build client for Electron (remote backend)
+        if: ${{ inputs.remote_api_base != '' }}
+        env:
+          REMOTE_API_BASE: ${{ inputs.remote_api_base }}
+        run: npm run build:client:electron:remote
+
+      - name: Rebuild native deps for Electron
+        run: npx electron-builder install-app-deps
+
+      - name: Package Windows (NSIS)
+        env:
+          USE_REMOTE_API: ${{ inputs.remote_api_base != '' && 'true' || '' }}
+        run: npx electron-builder --win
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-dist
+          path: |
+            dist/*.exe
+            dist/*.blockmap
+            dist/win-*/**

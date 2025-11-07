@@ -1,5 +1,9 @@
 <template>
   <div class="page technical-task-create">
+    <div v-if="overlayVisible" class="page-overlay">
+      <img :src="logoUrl" alt="logo" class="overlay-logo" />
+      <div class="overlay-text">正在生成协作卡，请稍候…</div>
+    </div>
     <div class="header">
       <h2 v-if="editingId">编辑技术任务</h2>
     </div>
@@ -26,9 +30,15 @@
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label="技术人员" :rules="[{ required: true, message: '必填' }]">
-            <a-input v-model:value="technicianName" placeholder="请输入技术人员用户名" />
-            <div class="tip">临时方案：输入技术人员用户名（后端将根据用户名解析ID）。</div>
+          <a-form-item label="技术人员（可多选）" :rules="[{ required: true, message: '必填' }]">
+            <a-select
+              v-model:value="technicianNames"
+              mode="tags"
+              :options="technicianOptions"
+              :token-separators="[',',';',' ']"
+              placeholder="选择或输入技术人员用户名"
+            />
+            <div class="tip">支持选择多个技术人员，后端将一并保存并返回。</div>
           </a-form-item>
         </a-col>
       </a-row>
@@ -85,10 +95,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import type { UploadProps, UploadFile } from 'ant-design-vue'
 import { useRouter, useRoute } from 'vue-router'
 import { technicalTasksApi, type CreateTechnicalTaskPayload, type TechnicalTaskListItem } from '../api/technicalTasks'
+import authService from '../api/auth'
+import adminApi, { type AdminUser } from '../api/admin'
+// 需求变更：引入用户信息以加载技术人员选项
 
 const router = useRouter()
 const route = useRoute()
@@ -100,6 +113,7 @@ const form = ref<CreateTechnicalTaskPayload>({
   technician_id: 0,
   sales_owner_username: undefined,
   technician_username: undefined,
+  technician_usernames: undefined,
   client_contact_name: '',
   client_contact_phone: '',
   start_time: '',
@@ -109,12 +123,20 @@ const form = ref<CreateTechnicalTaskPayload>({
   attachmentFile: null
 })
 const salesOwnerName = ref('')
-const technicianName = ref('')
+const technicianNames = ref<string[]>([])
+const technicianOptions = ref<{ label: string, value: string }[]>([])
 const startDate = ref('')
 const deadline = ref('')
 const deliverables = ref<string[]>([''])
 const fileList = ref<UploadFile[]>([])
 const submitting = ref(false)
+const overlayVisible = ref(false)
+const currentUser = authService.getStoredUser()
+
+// 统一静态资源基础地址（生产通过 VITE_API_BASE_URL 注入；本地默认 3005）
+const API_BASE = (import.meta.env?.VITE_API_BASE_URL as string | undefined) || 'http://localhost:3005'
+const UPLOADS_BASE = `${API_BASE.replace(/\/$/, '')}/uploads`
+const logoUrl = computed(() => `${UPLOADS_BASE}/logo.jpg`)
 
 function addDeliverable() { deliverables.value.push('') }
 function removeDeliverable(idx: number) { deliverables.value.splice(idx, 1) }
@@ -126,7 +148,7 @@ const onFileChange: UploadProps['onChange'] = (info) => {
 
 async function submit(status: 'draft'|'active') {
   // 校验
-  if (!form.value.project_name || !form.value.customer_name || !salesOwnerName.value || !technicianName.value || !form.value.client_contact_name || !form.value.client_contact_phone || !startDate.value || !deadline.value || deliverables.value.filter(v => v && v.trim()).length === 0 || !form.value.attachmentFile) {
+  if (!form.value.project_name || !form.value.customer_name || !salesOwnerName.value || technicianNames.value.length === 0 || !form.value.client_contact_name || !form.value.client_contact_phone || !startDate.value || !deadline.value || deliverables.value.filter(v => v && v.trim()).length === 0 || !form.value.attachmentFile) {
     window.$message?.error?.('请完整填写所有必填项并上传ZIP文件')
     return
   }
@@ -134,7 +156,8 @@ async function submit(status: 'draft'|'active') {
   try {
     // 由后端根据用户名解析ID（销售默认当前用户）
     form.value.sales_owner_username = salesOwnerName.value
-    form.value.technician_username = technicianName.value
+    form.value.technician_username = technicianNames.value[0] || ''
+    form.value.technician_usernames = technicianNames.value.slice()
     form.value.sales_owner_id = 0
     form.value.technician_id = 0
     form.value.start_time = startDate.value
@@ -156,12 +179,19 @@ async function submit(status: 'draft'|'active') {
 }
 
 function saveDraft() { submit('draft') }
-function saveAndGenerate() { submit('active') }
+async function saveAndGenerate() {
+  overlayVisible.value = true
+  try {
+    await submit('active')
+  } finally {
+    overlayVisible.value = false
+  }
+}
 function goBack() {
   // 清空表单并返回
   form.value = { project_name: '', customer_name: '', sales_owner_id: 0, technician_id: 0, client_contact_name: '', client_contact_phone: '', start_time: '', deadline: '', deliverables: [], status: 'active', attachmentFile: null }
   salesOwnerName.value = ''
-  technicianName.value = ''
+  technicianNames.value = []
   startDate.value = ''
   deadline.value = ''
   deliverables.value = ['']
@@ -170,6 +200,7 @@ function goBack() {
 }
 
 onMounted(async () => {
+  await loadTechnicianOptions()
   if (!editingId.value) {
     return
   }
@@ -192,10 +223,44 @@ function prefillFromRecord(rec: TechnicalTaskListItem) {
   form.value.project_name = rec.project_name || ''
   form.value.customer_name = rec.customer_name || ''
   salesOwnerName.value = rec.sales_owner_name || ''
-  technicianName.value = rec.technician_name || ''
+  technicianNames.value = Array.isArray(rec.technician_usernames) && rec.technician_usernames.length > 0
+    ? rec.technician_usernames.slice()
+    : (rec.technician_name ? [rec.technician_name] : [])
   startDate.value = rec.start_time || ''
   deadline.value = rec.deadline || ''
   // deliverables 字段后端可能未返回，保持原状或留空
+}
+
+async function loadTechnicianOptions() {
+  try {
+    // 管理员可获取系统用户列表（仅取技术人员）
+    if (currentUser && currentUser.role === 'admin') {
+      const { data } = await adminApi.getUsers()
+      const techs = (data || []).filter((u: AdminUser) => u.role === 'technician')
+      technicianOptions.value = techs.map((u: AdminUser) => ({ label: u.username, value: u.username }))
+      return
+    }
+  } catch {
+    // 非管理员或接口不可用时走兜底
+  }
+  // 兜底：从技术任务列表里提取历史出现过的技术人员名，支持自由输入
+  try {
+    const items = await technicalTasksApi.list()
+    const names = Array.from(
+      new Set(
+        (items || [])
+          .flatMap((it: TechnicalTaskListItem) => {
+            const many = Array.isArray(it.technician_usernames) ? it.technician_usernames : []
+            const single = it.technician_name ? [it.technician_name] : []
+            return [...many, ...single]
+          })
+          .filter((n): n is string => typeof n === 'string' && n.length > 0)
+      )
+    ) as string[]
+    technicianOptions.value = names.map(n => ({ label: n, value: n }))
+  } catch {
+    technicianOptions.value = []
+  }
 }
 </script>
 
@@ -204,4 +269,14 @@ function prefillFromRecord(rec: TechnicalTaskListItem) {
 .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .tip { color: #999; font-size: 12px; margin-top: 4px; }
 .form-actions { display: flex; gap: 10px; margin-top: 16px; }
+.page-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.88); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; }
+.overlay-logo { width: 120px; height: 120px; object-fit: contain; animation: pulse 1.2s ease-in-out infinite; }
+.overlay-text { margin-top: 16px; color: #333; font-size: 14px; }
+@keyframes pulse { 0% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); opacity: 0.9; } }
+</style>
+
+<style scoped>
+/* 暗色模式覆盖 */
+:global(.layout.dark) .technical-task-create .overlay-text { color: #e8e8e8; }
+:global(.layout.dark) .technical-task-create .page-overlay { background: rgba(0,0,0,0.55); }
 </style>

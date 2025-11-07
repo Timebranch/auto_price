@@ -55,19 +55,20 @@
 
         <div style="text-align: right; margin-top: 12px;">
           <div>总价格：{{ formatMoney(detail?.total_price || 0) }}</div>
+          <div style="margin-top: 4px;">价格大写：{{ totalPriceUppercase }}</div>
         </div>
       </div>
 
       <div style="margin-top: 16px; display: flex; gap: 8px; justify-content: flex-end;">
         <a-button @click="detailOpen = false">关闭</a-button>
-        <a-button type="primary" @click="downloadPdf">下载</a-button>
+        <a-button type="primary" @click="downloadPdf" :loading="downloading" :disabled="downloading">下载</a-button>
       </div>
     </a-modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, h, onMounted } from 'vue'
+import { ref, h, onMounted, computed } from 'vue'
 import { Button } from 'ant-design-vue'
 import settlementsApi, { type SettlementListRow, type SettlementDetail, type SettlementItem } from '@/api/settlements'
 import { message } from 'ant-design-vue'
@@ -81,11 +82,56 @@ const rows = ref<SettlementListRow[]>([])
 const detailOpen = ref(false)
 const detail = ref<SettlementDetail | null>(null)
 const printArea = ref<HTMLElement | null>(null)
+const downloading = ref(false)
 
 const formatMoney = (n: number) => {
   const num = Number(n || 0)
   return num.toFixed(2)
 }
+
+// 金额转中文大写（人民币）
+const numberToChineseUppercase = (n: number): string => {
+  const fraction = ['角', '分'] as const
+  const digit = ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖'] as const
+  const unit: readonly [readonly string[], readonly string[]] = (
+    [['元', '万', '亿'], ['', '拾', '佰', '仟']]
+  ) as const
+  const head = n < 0 ? '负' : ''
+  n = Math.abs(n)
+  let s = ''
+  for (let i = 0; i < fraction.length; i++) {
+    const d = digit[Math.floor(n * 10 * Math.pow(10, i)) % 10] ?? ''
+    const f = fraction[i] ?? ''
+    s += (d + f).replace(/零./, '')
+  }
+  s = s || '整'
+  let integer = Math.floor(n)
+  for (let i = 0; i < unit[0].length && integer > 0; i++) {
+    let p = ''
+    const smallUnits = unit[1]
+    const bigUnits = unit[0]
+    for (let j = 0; j < smallUnits.length && integer > 0; j++) {
+      const digitChar = digit[integer % 10] ?? ''
+      const small = smallUnits[j] ?? ''
+      p = digitChar + small + p
+      integer = Math.floor(integer / 10)
+    }
+    s = p.replace(/(零.)+/g, '零').replace(/零+$/, '') + (bigUnits[i] ?? '') + s
+  }
+  const result = head + s
+  return result
+    .replace(/(零元)/, '元')
+    .replace(/(零.)+/g, '零')
+    .replace(/^元$/, '零元')
+}
+
+const totalPrice = computed(() => {
+  const detailTotal = Number(detail.value?.total_price || 0)
+  if (Number.isFinite(detailTotal) && detailTotal > 0) return detailTotal
+  const sum = detailItems.value.reduce((acc, it) => acc + (Number(it.price) || 0), 0)
+  return Number.isFinite(sum) ? sum : 0
+})
+const totalPriceUppercase = computed(() => numberToChineseUppercase(totalPrice.value))
 
 interface SettlementItemRow {
   index: number
@@ -140,12 +186,17 @@ const downloadPdf = async () => {
   try {
     const id = detail.value?.id
     if (!id) return
+    downloading.value = true
     const res = await settlementsApi.download(id)
     const blob = new Blob([res.data], { type: 'application/pdf' })
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `settlement_${id}.pdf`
+    const safe = (s: unknown) => String(s ?? '')
+      .replace(/[\\/:*?"<>|]/g, '')
+      .replace(/\s+/g, '_')
+    const filename = `${safe(detail.value?.order_name)}_${safe(detail.value?.customer_name)}_${safe(detail.value?.delivery_date)}_${safe(detail.value?.delivery_id)}.pdf`
+    a.download = filename
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -153,6 +204,8 @@ const downloadPdf = async () => {
   } catch (err) {
     console.error(err)
     message.error('下载失败：请确认已登录且有权限')
+  } finally {
+    downloading.value = false
   }
 }
 

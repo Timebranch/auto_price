@@ -52,7 +52,7 @@
           </div>
           <div class="header-right">
             <a-space>
-              <a-button size="small" type="text" class="theme-toggle" @click="toggleTheme">
+              <a-button v-if="enableThemeToggle" size="small" type="text" class="theme-toggle" @click="toggleTheme">
                 <BulbOutlined /> {{ isDark ? '亮色' : '暗色' }}
               </a-button>
             </a-space>
@@ -133,7 +133,8 @@ const onMenuSelect = (info: { key: string }) => {
   router.push(info.key)
 }
 
-// 主题切换（暗色/亮色），持久化到 localStorage
+// 主题切换（暗色/亮色），持久化到 localStorage；临时隐藏按钮
+const enableThemeToggle = false
 const isDark = ref(localStorage.getItem('theme_mode') === 'dark')
 const toggleTheme = () => {
   isDark.value = !isDark.value
@@ -162,7 +163,7 @@ const themeConfig = computed(() => ({
 .header-left { display: flex; align-items: center; gap: 14px; margin-right: 20px; }
 .brand { display: flex; align-items: center; gap: 10px; }
 .brand-logo { width: 28px; height: 28px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-.brand-text { color: #1f1f1f; font-weight: 600; letter-spacing: 0.5px; }
+.brand-text { color: #1f1f1f; font-weight: 600; letter-spacing: 0.5px; font-size: 18px; }
 .header-center { flex: 1 1 auto; }
 .header-center :deep(.ant-menu) { background: transparent; border-bottom: none; color: #1f1f1f; }
 .header-center :deep(.ant-menu-item-selected),

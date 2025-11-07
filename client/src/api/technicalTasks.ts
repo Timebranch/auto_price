@@ -6,6 +6,8 @@ export interface TechnicalTaskListItem {
   customer_name: string
   sales_owner_name: string
   technician_name?: string
+  technician_usernames?: string[]
+  deliverables?: string[]
   client_contact_name: string
   client_contact_phone: string
   start_time: string
@@ -32,6 +34,7 @@ export interface CreateTechnicalTaskPayload {
   // 可选：使用用户名由后端解析ID
   sales_owner_username?: string
   technician_username?: string
+  technician_usernames?: string[]
   client_contact_name: string
   client_contact_phone: string
   start_time: string // ISO
@@ -58,6 +61,7 @@ export const technicalTasksApi = {
     fd.set('technician_id', String(payload.technician_id || 0))
     if (payload.sales_owner_username) fd.set('sales_owner_username', payload.sales_owner_username)
     if (payload.technician_username) fd.set('technician_username', payload.technician_username)
+    if (payload.technician_usernames && payload.technician_usernames.length) fd.set('technician_usernames', JSON.stringify(payload.technician_usernames))
     fd.set('client_contact_name', payload.client_contact_name)
     fd.set('client_contact_phone', payload.client_contact_phone)
     fd.set('start_time', payload.start_time)
@@ -80,6 +84,7 @@ export const technicalTasksApi = {
     fd.set('customer_name', payload.customer_name)
     if (payload.sales_owner_username) fd.set('sales_owner_username', payload.sales_owner_username)
     if (payload.technician_username) fd.set('technician_username', payload.technician_username)
+    if (payload.technician_usernames && payload.technician_usernames.length) fd.set('technician_usernames', JSON.stringify(payload.technician_usernames))
     fd.set('client_contact_name', payload.client_contact_name)
     fd.set('client_contact_phone', payload.client_contact_phone)
     fd.set('start_time', payload.start_time)

@@ -389,12 +389,11 @@ const totalPrice = computed(() => {
 })
 const totalPriceUppercase = computed(() => numberToChineseUppercase(totalPrice.value))
 
-// 生成结算单可用性：所有行单价已填写，且不全为 0（至少一项>0）
+// 生成结算单可用性：至少一项单价 > 0（允许部分未填或为 0）
 const canGenerateSettlement = computed(() => {
   if (!auditDetail.value || auditItems.value.length === 0) return false
-  const allFilled = auditItems.value.every(it => typeof it.unit_price === 'number' && !Number.isNaN(it.unit_price))
   const someNonZero = auditItems.value.some(it => Number(it.unit_price || 0) > 0)
-  return allFilled && someNonZero
+  return someNonZero
 })
 
 // 生成/覆盖结算单（保持弹窗打开）
